@@ -1,0 +1,6 @@
+Ranking,RankText,TeamId,TeamName,TournamentTeamId,TournamentTeamName,PrizeUSD,UnknownPlayerCount,TournamentId,ErrorCode,Error
+1,1st,0,,13549,part of HEADSHOTBG,105.43,0,10000,,
+1,WIN,0,,13553,fnatic,3000.00,0,10001,,
+1,1st,0,,13554,Team Liquid,2000.00,0,10002,,
+2,2nd,0,,13555,Gamers2,750.00,0,10002,,
+3,3rd,0,,13556,Natus Vincere,250.00,0,10002,,
