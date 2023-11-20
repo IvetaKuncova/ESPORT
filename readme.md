@@ -26,9 +26,6 @@ The code had to be written in the way that it could run for xx hours without int
 
 **2)** There is also script for scraping _Date of Birth_, but I strictly recommend not use it, unless you are aware of legal consequencisy!
 
-**3)** _Correlation statistics - esport players_
-There is a code in python Jupyter Notebook determining the degree of correlation (Kendall's Tau) between chosen indicators. This script also work with determining normality of distribution and linearity of data as a assumptions for statistical functions.
-
 **B) SQL:**
 
 There are querries we used for processing the data in _Snowflake_.
@@ -36,3 +33,5 @@ There are querries we used for processing the data in _Snowflake_.
 Because downloading data from one API took many hours, and as a result we had up to 20 files for each API, it was necessary to first union these files using the UNION function. We also started with basic data cleansing.
 In the next phase, we started creating tables from the created datasets according to the designed data model.
 
+**C) Correlation statistics - esport players**
+There is a code in python Jupyter Notebook determining the degree of correlation (Kendall's Tau) between chosen indicators. This script also work with determining normality of distribution and linearity of data as a assumptions for statistical functions.
