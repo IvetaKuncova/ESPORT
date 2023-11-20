@@ -1,12 +1,14 @@
 This is part of a couple project for our study in data analysis at Czechitas.cz - nonprofit organization for educating woman in IT.
 
 **PROJECT E-SPORT**
+
 It is about data from https://www.esportsearnings.com/
 Data about GDP, population, internet are from from https://ourworldindata.org/
 
 You can see my code in python and SQL (Snowflake).
 
 **A) PYTHON:**
+
 **1)** There are scripts for downloading data from selected APIs (Documentation: https://www.esportsearnings.com/apidocs)
 
 The code consists of several parts:
@@ -28,6 +30,7 @@ The code had to be written in the way that it could run for xx hours without int
 There is a code in python Jupyter Notebook determining the degree of correlation (Kendall's Tau) between chosen indicators. This script also work with determining normality of distribution and linearity of data as a assumptions for statistical functions.
 
 **B) SQL:**
+
 There are querries we used for processing the data in Snowlfake.
 
 Because downloading data from one API took many hours, and as a result we had up to 20 files for each API, it was necessary to first union these files using the UNION function. We also started with basic data cleansing.
