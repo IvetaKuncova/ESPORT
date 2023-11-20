@@ -1,4 +1,7 @@
 # From https://www.esportsearnings.com/ scrapes Date of Birth of individual players
+
+##I strictly recommend not tu use this code for scraping, unless you are aware of legal consequencis!
+
 ## Most of the players have not Date of Birth filled.
 # You need file with all the links, similar to my sample file "links_todo.csv"
 
