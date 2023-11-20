@@ -1,4 +1,4 @@
-This is part of a couple project for my study in data analysis at Czechitas.cz - nonprofit organization for educating woman in IT.
+This is part of a couple project for our study in data analysis at Czechitas.cz - nonprofit organization for educating woman in IT.
 
 PROJECT E-SPORT
 It is about data from https://www.esportsearnings.com/
