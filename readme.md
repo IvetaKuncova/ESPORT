@@ -7,9 +7,9 @@ Data about GDP, population, internet are from from https://ourworldindata.org/
 
 You can see my code in python and SQL (Snowflake).
 
-**A) PYTHON:**
+**1) PYTHON:**
 
-**1)** There are scripts for downloading data from selected APIs (Documentation: https://www.esportsearnings.com/apidocs)
+**A)** There are scripts for downloading data from selected APIs (Documentation: https://www.esportsearnings.com/apidocs)
 
 The code consists of several parts:
 - Importing libraries
@@ -24,14 +24,14 @@ The code consists of several parts:
 
 The code had to be written in the way that it could run for xx hours without interruption (typically overnight) and save the data continuously. If an error occurred, such as "Empty response" or "Bad gateway", the code had to either skip the given ID or try to download it again.
 
-**2)** There is also script for scraping _Date of Birth_, but I strictly recommend not use it, unless you are aware of legal consequencisy!
+**B)** There is also script for scraping _Date of Birth_, but I strictly recommend not use it, unless you are aware of legal consequencisy!
 
-**B) SQL:**
+**2) SQL:**
 
 There are querries we used for processing the data in _Snowflake_.
 
 Because downloading data from one API took many hours, and as a result we had up to 20 files for each API, it was necessary to first union these files using the UNION function. We also started with basic data cleansing.
 In the next phase, we started creating tables from the created datasets according to the designed data model.
 
-**C) Correlation statistics - esport players**
+**3) Correlation statistics - esport players**
 There is a code in python Jupyter Notebook determining the degree of correlation (Kendall's Tau) between chosen indicators. This script also work with determining normality of distribution and linearity of data as a assumptions for statistical functions.
