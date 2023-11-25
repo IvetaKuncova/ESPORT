@@ -3,6 +3,7 @@ This is part of a couple project for our study in data analysis at Czechitas.cz 
 **PROJECT E-SPORT**
 
 It is about data from https://www.esportsearnings.com/.
+
 Data about GDP, population, internet are from from https://ourworldindata.org/.
 
 You can see our code in python and SQL (Snowflake).
