@@ -32,6 +32,7 @@ There are querries we used for processing the data in _Snowflake_.
 
 Because downloading data from one API took many hours, and as a result we had up to 20 files for each API, it was necessary to first union these files using the UNION function. We also started with basic data cleansing.
 In the next phase, we started creating tables from the created datasets according to the designed data model.
+
 We used functions as: CTE, SUBSELECTS, WINDOW FUNCTIONS (RANK), CASE WHEN, JOIN, UNION, AGGREGATIONS (SUM, COUNT, MEDIAN, AVG, MIN, MAX, PERCENTILE_CONT), CREATE (TEMPORARY) TABLE, ALTER TABLE,  UPDATE, ADD COLLUMN, DROP COLLUMN, INSERT VALUES, TRIM, REPLACE, TRANSLATE, CONCAT, LOWER, (I)LIKE (ANY), IFFNULL, TRANSLATE, CONCAT, TO_DATE, DATE, YEAR, DISTINCT ...
 
 **3) Correlation statistics - esport players**
