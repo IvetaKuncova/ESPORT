@@ -1,4 +1,5 @@
 This is part of a couple project for our study in data analysis at Czechitas.cz - nonprofit organization for educating woman in IT.
+Project blog in czech: https://medium.com/@ivanaiveta/e-sport-nen%C3%AD-jenom-hobby-7feb22905bae 
 
 **PROJECT E-SPORT**
 
