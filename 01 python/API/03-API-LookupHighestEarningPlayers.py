@@ -1,15 +1,15 @@
 """
-04 LookupGameById
-Script for esportsearning.com API: LookupGameById 
-http://api.esportsearnings.com/v0/LookupGameById?apikey=<apikey>&gameid=<gameid>
-Documentation: https://www.esportsearnings.com/apidocs 
+03 LookupHighestEarningPlayers
+Script for esportsearning.com API: LookupHighestEarningPlayers
+URL: http://api.esportsearnings.com/v0/LookupHighestEarningPlayers?apikey=<apikey>&offset=<offset>
+Documentation: https://www.esportsearnings.com/apidocs
 Timeout required: 1 second (BAN)
-Output format: json + csv
+Output format: jsonl + csv
 
 This is my first attempt at coding in Python. If you have any suggestions on how to improve this script, I would love to read them.
 
 During the execution of the script, the following warnings are generated:
-InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.esportsearnings.com'. Adding certificate verification is strongly advised.
+"InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.esportsearnings.com'. Adding certificate verification is strongly advised.
 See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
 warnings.warn("
 This warning means that the site does not have a valid SSL certificate (i.e., https://). 
@@ -38,23 +38,23 @@ disable_warnings(InsecureRequestWarning)
 
 # setting global variables
 apikey = 'your api key here' # YOU CAN GET AN API KEY BY REGISTERING HERE: https://www.esportsearnings.com/dev
-gameid = 151 # !!! # !!! ID You want to start on
-numberofID = 3 # !!! number of IDs You want to process
-file_name = f"LookupGameById_{gameid}-{gameid+numberofID-1}"
+offset = 0 # !!! starting offset (how many tournaments should be skipped)
+stopoffset = 1 # !!! How many offsets should be processed?
+file_name = f"03-API-LookupHighestEarningPlayers{offset}-{offset+(stopoffset*100)-100}"
 # for overview at the end of the script it saves the error messages that occurred during processing
-errorCodes = [] 
+errorCodes = []
 
 # displays the start time and end time of the script execution to estimate the duration of this script
 # to calculate the processing time (the result is the time in seconds):
-time_start = time.time() 
+time_start = time.time()
 time_begin = datetime.fromtimestamp(time_start)
 # display the time on the terminal in blue color (ansi code)
-print(f"\u001b[36;1mTime at the beginning of the script: {time_begin}\u001b[0m") 
+print(f"\u001b[36;1mTime at the beginning of the script: {time_begin}\u001b[0m")
 
 # to estimate the approximate time you can arrive at a processed script:
 # you can add something extra to the estimated processing time (correct according to real times)
-estim_time_of_execution = numberofID * 1.7
-print(f"\u001b[36;1mEstimated script processing time: {(estim_time_of_execution//60)//60} hours, {(estim_time_of_execution//60)%60} minutes, {((estim_time_of_execution%60)%60):.2f} seconds\u001b[0m") # blue
+estim_time_of_execution = stopoffset * 3
+print(f"\u001b[36;1mEstimated script processing time: {(estim_time_of_execution//60)//60} hours, {(estim_time_of_execution//60)%60} minutes, {((estim_time_of_execution%60)%60):.2f} seconds\u001b[0m") # in blue color
 
 # creating a session to handle HTTP exceptions
 # If the API returns a code 502 (bad gateway) or 429 (too many requests) instead of the data, 
@@ -68,27 +68,26 @@ adapter = HTTPAdapter(max_retries=retry)
 session.mount("http://", adapter)
 session.mount("https://", adapter)
 
-# API data retrieval functions
-def get_LookupGameById(gameid):
+# API data retrieval function
+def get_LookupHighestEarningPlayers(offset):
     # API requires min 1 second between queries, min 1 second between requests
-    time.sleep(1) 
-    url = f'https://api.esportsearnings.com/v0/LookupGameById?apikey={apikey}&gameid={gameid}'
-    # without Verify=False the request will not be executed due to an invalid SSL certificate     
+    time.sleep(1.0)
+    url = f'https://api.esportsearnings.com/v0/LookupHighestEarningPlayers?apikey={apikey}&offset={offset}'
+    # without Verify=False the request will not be executed due to an invalid SSL certificate
     response = session.get(url, verify=False)
     # on the terminal You can see which address You are currently at. For quick orientation, how far You are in the request, in pink color
-    print(f"\u001b[35m{url}\u001b[0m") 
-    
-    
+    print(f"\u001b[35m{url}\u001b[0m")    
+
     # handling of Errors returned by the API (200 = success)
     if response.status_code != 200: 
-    # If the API reports an Error, we display it and also save it to the list, in red color
+        # If the API reports an Error, we display it and also save it to the list, in red color
         print(f"\u001b[31;1mError: HTTP {response.status_code}\u001b[0m") 
-        errorCodes.append(f"GameId:{gameid}-error:{response.status_code}")
+        errorCodes.append(f"offset:{offset}-error:{response.status_code}")  
         data = [{"Error": f"HTTP {response.status_code}"}]
     # if the API returns "NULL"/none:
     elif not response.text:
         print(f"\u001b[31;1mError: Empty response\u001b[0m") 
-        errorCodes.append(f"GameId:{gameid}-Error:Empty response")
+        errorCodes.append(f"offset:{offset}-Error:Empty response")
         data = [{"Error": "Empty response"}]
     else:
         try:
@@ -98,24 +97,25 @@ def get_LookupGameById(gameid):
             print(response.status_code)
             print(response.text)
             data = [{"Error": "Invalid response"}]
-    # Add a new key and ID value
-    data.update({"GameId": gameid}) 
 
-    return data                    
+    return data
 
+
+# saving data to a file
 try:
     with open(f"{file_name}.jsonl", mode="w", encoding="utf-8") as file:
-        for i in range(0, numberofID):
-            # call the function with the parameter corresponding to the first ID where I want to start
-            dataA = get_LookupGameById(gameid) 
-            gameid += 1  # ID increase by 1
+        for i in range(0, stopoffset):
+            # call the function with the parameter corresponding to the first ID where I want to start and offset
+            dataA = get_LookupHighestEarningPlayers(offset)
+            offset += 100  # add +100 to offset
             if not dataA:
                 continue
-            json.dump(dataA, file, ensure_ascii=False) 
-            file.write("\n") # separate lines
+            for listA in dataA:
+                json.dump(listA, file, ensure_ascii=False) 
+                file.write("\n") # separate lines
 # the code will be executed even if the user interrupts its execution (which sometimes takes hours):
 except KeyboardInterrupt:
-    print("Interrupted by user")  
+    print("Interrupted by user")    
 
 # convert json file to csv:
 def jsonl_to_csv():     
@@ -126,13 +126,12 @@ def jsonl_to_csv():
                 data = json.loads(row)
                 if first_row:
                     first_row = False
-                    headers = list(data.keys()) + ["ErrorCode", "Error"]
+                    headers = list(data.keys()) + ["Error"]
                     writer = csv.DictWriter(fw, fieldnames=headers)
                     writer.writeheader()
                 writer.writerow(data)
 # call the jsonl_to_csv() function
 jsonl_to_csv()
-
 
 # Request time summary: (When running longer requests (many IDs) we needed to have some overview, 
 # when to go back to the computer to the downloaded file and run the next one)
@@ -141,7 +140,8 @@ time_end = time.time()
 time_over = datetime.fromtimestamp(time_end, tz=None)
 print(f"\u001b[36;1mTime at the start of the request: {time_begin}\u001b[0m") # blue
 print(f"\u001b[36;1mTime at the end   of the request: {time_over}\u001b[0m") # blue
-print(f"\u001b[32;1mExpected request duration: {(estim_time_of_execution//60)//60} hodin, {(estim_time_of_execution//60)%60} minut, {((estim_time_of_execution%60)%60):.4f} sekund.\u001b[0m") # blue
-print(f"\u001b[32;1mActual   request duration: {(((time_end - time_start)//60)//60)} hodin, {(((time_end - time_start)//60)%60)} minut, {(((time_end - time_start)%60)%60):.4f} sekund.\u001b[0m") # green
+print(f"\u001b[32;1mExpected request duration: {(estim_time_of_execution//60)//60} hours, {(estim_time_of_execution//60)%60} minutes, {((estim_time_of_execution%60)%60):.4f} seconds.\u001b[0m") # blue
+print(f"\u001b[32;1mActual   request duration: {(((time_end - time_start)//60)//60)} hours, {(((time_end - time_start)//60)%60)} minutes, {(((time_end - time_start)%60)%60):.4f} seconds.\u001b[0m") # green
 print(f"\u001b[31;1mHTTP error codes: {errorCodes}\u001b[0m") # red
 print(f"\u001b[33mThe name of the output file is: {file_name}\u001b[0m") # yellow
+

@@ -4,19 +4,19 @@ Script for esportsearning.com API: LookupPlayerById
 URL: http://api.esportsearnings.com/v0/LookupPlayerById?apikey=<apikey>&playerid=<playerid>
 Documentation: https://www.esportsearnings.com/apidocs
 Timeout required: 1 second (BAN)
-Output format: json + csv
+Output format: jsonl + csv
 
 This is my first attempt at coding in Python. If you have any suggestions on how to improve this script, I would love to read them.
 
 During the execution of the script, the following warnings are generated:
-InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.esportsearnings.com'. Adding certificate verification is strongly advised.
+"InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.esportsearnings.com'. Adding certificate verification is strongly advised.
 See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
 warnings.warn("
 This warning means that the site does not have a valid SSL certificate (i.e., https://). 
 Since we are not sending any personal information to the site, this is not a problem. The code will still execute despite the warning.
 The warnings are therefore suppressed.
 
-The code contains ANSI color formatting for terminal output, e.g., "\u001b[35m" (see print(f"\u001b[35m{url}\u001b[0m")), 
+The script contains ANSI color formatting for terminal output, e.g., "\u001b[35m" (see print(f"\u001b[35m{url}\u001b[0m")), 
 so that it can be seen from a distance whether the request is proceeding normally (the download may take xx hours).
 
 TO MAKE THIS SCRIPT WORK, YOU MUST HAVE A VALID API KEY. YOU CAN GET AN API KEY BY REGISTERING HERE: https://www.esportsearnings.com/dev
@@ -40,7 +40,7 @@ disable_warnings(InsecureRequestWarning)
 apikey = 'your api key here' # YOU CAN GET AN API KEY BY REGISTERING HERE: https://www.esportsearnings.com/dev
 playerid = 1000 # !!! ID You want to start on
 numberofID = 3 # !!! number of IDs You want to process
-file_name = f"LookupPlayerById_{playerid}-{playerid+numberofID-1}"
+file_name = f"01-API-LookupPlayerById_{playerid}-{playerid+numberofID-1}"
 # for overview at the end of the script it saves the error messages that occurred during processing
 errorCodes = []
 
@@ -126,7 +126,7 @@ def jsonl_to_csv():
                 data = json.loads(row)
                 if first_row:
                     first_row = False
-                    hearders = list(data.keys()) + ["ErrorCode", "Error"]
+                    hearders = list(data.keys()) + ["Error"]
                     writer = csv.DictWriter(fw, fieldnames=hearders)
                     writer.writeheader()
                 writer.writerow(data)
@@ -140,7 +140,7 @@ time_end = time.time()
 time_over = datetime.fromtimestamp(time_end, tz=None)
 print(f"\u001b[36;1mTime at the start of the request: {time_begin}\u001b[0m") # blue
 print(f"\u001b[36;1mTime at the end   of the request: {time_over}\u001b[0m") # blue
-print(f"\u001b[32;1mExpected request duration: {(estim_time_of_execution//60)//60} hodin, {(estim_time_of_execution//60)%60} minut, {((estim_time_of_execution%60)%60):.4f} sekund.\u001b[0m") # blue
-print(f"\u001b[32;1mActual   request duration: {(((time_end - time_start)//60)//60)} hodin, {(((time_end - time_start)//60)%60)} minut, {(((time_end - time_start)%60)%60):.4f} sekund.\u001b[0m") # green
+print(f"\u001b[32;1mExpected request duration: {(estim_time_of_execution//60)//60} hours, {(estim_time_of_execution//60)%60} minutes, {((estim_time_of_execution%60)%60):.4f} seconds.\u001b[0m") # blue
+print(f"\u001b[32;1mActual   request duration: {(((time_end - time_start)//60)//60)} hours, {(((time_end - time_start)//60)%60)} minutes, {(((time_end - time_start)%60)%60):.4f} seconds.\u001b[0m") # green
 print(f"\u001b[31;1mHTTP error codes: {errorCodes}\u001b[0m") # red
 print(f"\u001b[33mThe name of the output file is: {file_name}\u001b[0m") # yellow

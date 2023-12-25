@@ -1,10 +1,10 @@
 """
-08 LookupTournamentResultsByTournamentId
-Script for esportsearning.com API:LookupTournamentResultsByTournamentId
-http://api.esportsearnings.com/v0/LookupTournamentResultsByTournamentId?apikey=<apikey>&tournamentid=<tournamentid>
+09 LookupTournamentTeamResultsByTournamentId
+Script for esportsearning.com API: LookupTournamentTeamResultsByTournamentId
+http://api.esportsearnings.com/v0/LookupTournamentTeamResultsByTournamentId?apikey=<apikey>&tournamentid=<tournamentid>
 Documentation: https://www.esportsearnings.com/apidocs 
 Timeout required: 1 second (BAN)
-Output format: json + csv
+Output format: jsonl + csv
 
 This is my first attempt at coding in Python. If you have any suggestions on how to improve this script, I would love to read them.
 
@@ -38,11 +38,12 @@ disable_warnings(InsecureRequestWarning)
 
 # setting global variables
 apikey = 'your api key here' # YOU CAN GET AN API KEY BY REGISTERING HERE: https://www.esportsearnings.com/dev
-tournamentid = 1000 # !!! ID You want to start on
-numberofID = 1 # !!! number of IDs You want to process
-file_name = f"LookupTournamentResultsByTournamentId_{tournamentid}-{tournamentid+numberofID-1}"
+tournamentid = 10000 # !!! ID You want to start on
+numberofID = 3 # !!! number of IDs You want to process
+file_name = f"09-API-LookupTournamentTeamResultsByTournamentId_{tournamentid}-{tournamentid+numberofID-1}"
 # for overview at the end of the script it saves the error messages that occurred during processing
 errorCodes = [] 
+
 
 # displays the start time and end time of the script execution to estimate the duration of this script
 # to calculate the processing time (the result is the time in seconds):
@@ -69,14 +70,14 @@ session.mount("http://", adapter)
 session.mount("https://", adapter)
 
 # API data retrieval functions
-def get_LookupTournamentResultsByTournamentId(tournamentid):
+def get_LookupTournamentTeamResultsByTournamentId(tournamentid):
     # API requires min 1 second between queries, min 1 second between requests
     time.sleep(1) 
-    url = f'https://api.esportsearnings.com/v0/LookupTournamentResultsByTournamentId?apikey={apikey}&tournamentid={tournamentid}'
-    # without Verify=False the request will not be executed due to an invalid SSL certificate   
+    url = f'https://api.esportsearnings.com/v0/LookupTournamentTeamResultsByTournamentId?apikey={apikey}&tournamentid={tournamentid}'
+    # without Verify=False the request will not be executed due to an invalid SSL certificate
     response = session.get(url, verify=False)
     # on the terminal You can see which address You are currently at. For quick orientation, how far You are in the request, in pink color
-    print(f"\u001b[35m{url}-{i}\u001b[0m") 
+    print(f"\u001b[35m{url}\u001b[0m") 
     
     
     # handling of Errors returned by the API (200 = success)
@@ -101,15 +102,15 @@ def get_LookupTournamentResultsByTournamentId(tournamentid):
             print(response.status_code)
             print(response.text)
             data = [{"Error": "Invalid response"}]
-    # Add a new key and ID value
+
     return data                    
 
 # saving data to a file
 try:
     with open(f"{file_name}.jsonl", mode="w", encoding="utf-8") as file:
         for i in range(0, numberofID):
-            # call the function with the parameter corresponding to the first ID where I want to start
-            dataA = get_LookupTournamentResultsByTournamentId(tournamentid) 
+             # call the function with the parameter corresponding to the first ID where I want to start
+            dataA = get_LookupTournamentTeamResultsByTournamentId(tournamentid) 
             tournamentid += 1  # ID increase by 1
             if not dataA:
                 continue
@@ -129,7 +130,7 @@ def jsonl_to_csv():
                 data = json.loads(row)
                 if first_row:
                     first_row = False
-                    headers = list(data.keys()) + ["ErrorCode", "Error"]
+                    headers = list(data.keys()) + ["Error"]
                     writer = csv.DictWriter(fw, fieldnames=headers)
                     writer.writeheader()
                 writer.writerow(data)
@@ -142,9 +143,9 @@ jsonl_to_csv()
 # To calculate the processing time (the result is the time in seconds):
 time_end = time.time()
 time_over = datetime.fromtimestamp(time_end, tz=None)
-print(f"\u001b[36;1mTime at start of request: {time_begin}\u001b[0m") # blue
-print(f"\u001b[36;1mTime at end of   request: {time_over}\u001b[0m") # blue
-print(f"\u001b[32;1mExpected request duration: {(estim_time_of_execution//60)//60} hodin, {(estim_time_of_execution//60)%60} minut, {((estim_time_of_execution%60)%60):.4f} sekund.\u001b[0m") # blue
-print(f"\u001b[32;1mActual request duration: {(((time_end - time_start)//60)//60)} hodin, {(((time_end - time_start)//60)%60)} minut, {(((time_end - time_start)%60)%60):.4f} sekund.\u001b[0m") # green
+print(f"\u001b[36;1mTime at the start of the request: {time_begin}\u001b[0m") # blue
+print(f"\u001b[36;1mTime at the end   of the request: {time_over}\u001b[0m") # blue
+print(f"\u001b[32;1mExpected request duration: {(estim_time_of_execution//60)//60} hours, {(estim_time_of_execution//60)%60} minutes, {((estim_time_of_execution%60)%60):.4f} seconds.\u001b[0m") # blue
+print(f"\u001b[32;1mActual   request duration: {(((time_end - time_start)//60)//60)} hours, {(((time_end - time_start)//60)%60)} minutes, {(((time_end - time_start)%60)%60):.4f} seconds.\u001b[0m") # green
 print(f"\u001b[31;1mHTTP error codes: {errorCodes}\u001b[0m") # red
 print(f"\u001b[33mThe name of the output file is: {file_name}\u001b[0m") # yellow
