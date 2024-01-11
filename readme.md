@@ -35,7 +35,7 @@ There are querries we used for processing the data in _Snowflake_.
 Because downloading data from one API took many hours, and as a result we had up to 20 files for each API, it was necessary to first union these files using the UNION function. We also started with basic data cleansing.
 In the next phase, we started creating tables from the created datasets according to the designed data model.
 
-We used functions as: CTE, SUBSELECTS, WINDOW FUNCTIONS (RANK), CASE WHEN, JOIN, UNION, AGGREGATIONS (SUM, COUNT, MEDIAN, AVG, MIN, MAX, PERCENTILE_CONT), CREATE (TEMPORARY) TABLE, ALTER TABLE,  UPDATE, ADD COLLUMN, DROP COLLUMN, INSERT VALUES, TRIM, REPLACE, TRANSLATE, CONCAT, LOWER, (I)LIKE (ANY), IFFNULL, TRANSLATE, CONCAT, TO_DATE, DATE, YEAR, DISTINCT ...
+We used functions as: CTE, SUBSELECTS, CREATE (TEMPORARY) TABLE, ALTER TABLE, UPDATE, ADD COLLUMN, DROP COLLUMN, INSERT VALUES, (LEFT) JOIN, UNION (ALL), WINDOW FUNCTIONS (RANK), CASE WHEN, DISTINCT, AGGREGATIONS (SUM, COUNT, MEDIAN, AVG, MIN, MAX, PERCENTILE_CONT),  Text functions: TRIM, REPLACE, TRANSLATE, LISTAGG, REGEXP_SUBSTR, CONCAT, LOWER, (I)LIKE (ANY), IFFNULL, TRANSLATE, CONCAT, Date functions: TO_DATE, DATE, YEAR.
 
 **3) Correlation statistics - esport players**
 There is a code in python Jupyter Notebook determining the degree of correlation (Kendall's Tau) between chosen indicators. This script also work with determining normality of distribution and linearity of data as a assumptions for statistical functions.
