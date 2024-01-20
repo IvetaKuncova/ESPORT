@@ -103,8 +103,7 @@ SELECT
     "Country_name" AS POP_COUNTRY,
     "Year"::int AS POP_YEAR,
     "Population"::int AS POP_POPULATION,
-    "Population_aged_15_to_19_years"::int AS POP_POPULATION_AGED15_19,
-    "Population_aged_20_to_29_years"::int AS POP_POPULATION_AGED20_29
+    ("Population_aged_15_to_19_years" + "Population_aged_20_to_29_years")::int AS POP_POPULATION_AGED15_29
 FROM "population-and-demography"
 -- omitting rows containing summaries for certain areas (rows that are not for individual countries)
 WHERE 
@@ -475,13 +474,3 @@ WHERE T_TOURNAMENT_ID IN
         SELECT T_TOURNAMENT_ID
         FROM TOURNAMENT
     );
-
-
-
-
-
-
-
-
-
-

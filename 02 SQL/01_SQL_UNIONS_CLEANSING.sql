@@ -68,7 +68,7 @@ The duplicity was across more files, therefore it was necessery uninon all files
 
    GROUP BY "NameFirst", "NameLast", "CurrentHandle", "CountryCode", "TotalUSDPrize", "TotalTournaments", "PlayerId";
 
--- basic data cleansing
+-- data cleansing
 UPDATE TEMP_01API_PLAYER_UNIONED
 SET "NameFirst" = TRIM("NameFirst", '-');
 
@@ -170,7 +170,7 @@ CREATE OR REPLACE TABLE API04_GAME AS
         AND "TotalUSDPrize" = ''
         AND "TotalTournaments" = ''
         AND "TotalPlayers" = '');
--- In these files were not null values and also clensing was not needed.
+-- In these files were not null values and also cleansing was not needed.
 
 -- ----------------------------------------------------------------------------
 
@@ -267,7 +267,14 @@ Delete	                                                                         
 Delete	                                                                                            52657
 */
 
--- creating a final table  without null rows
+-- correction of incorrect date
+UPDATE TEMP_07API_TOURNAMENT_UNIONED
+SET "StartDate" = '2020-05-07'
+WHERE "StartDate" = '0202-05-07';
+
+/* create final table without null rows (except collumn
+"TournamentId", which is filled even if the Trouenament ID does not exists, because 
+I was adding IDs automatically in the python scripts)*/
 CREATE OR REPLACE TABLE API07_TOURNAMENT AS
     SELECT * FROM TEMP_07API_TOURNAMENT_UNIONED
     EXCEPT
@@ -279,11 +286,6 @@ CREATE OR REPLACE TABLE API07_TOURNAMENT AS
         AND "Location" is null
         AND "Teamplay" is null
         AND "TotalUSDPrize" is null;
-
--- correction of incorrect date
-UPDATE API07_TOURNAMENT
-SET "StartDate" = '2020-05-07'
-WHERE "StartDate" = '0202-05-07';
 
 
 -- ---------------------------------------------------------------------
@@ -487,7 +489,9 @@ SET "TeamId" = null
 WHERE "TeamId" = 0;
 
 
--- create final table and remove rows where all columns are null
+/* create final table without null rows (except collumn
+"TournamentId", which is filled even if the Tournament ID does not exists, because 
+I was adding IDs automatically in the python scripts)*/
 CREATE OR REPLACE TABLE API09_TOURNAMENT_RESULTS_TEAM AS
     SELECT * 
     FROM TEMP_API09_TOURNAMENT_RESULTS_TEAM_UNIONED
@@ -536,7 +540,9 @@ UPDATE TEMP_API10_TOURNAMENT_RESULTS_PLAYER_IN_TEAM_UNIONED
 SET "NameLast" = TRIM("NameLast", '-');
 
 
--- create final table and remove rows where all columns are null
+/* create final table without null rows (except collumn
+"tournamentId", which is filled even if the Tournament ID does not exists, because 
+I was adding IDs automatically in the python scripts)*/
 CREATE OR REPLACE TABLE API10_TOURNAMENT_RESULTS_PLAYER_IN_TEAM AS
     SELECT * FROM TEMP_API10_TOURNAMENT_RESULTS_PLAYER_IN_TEAM_UNIONED
 EXCEPT
@@ -555,10 +561,6 @@ EXCEPT
 -- -------------------------------------------------------------
 -- -------------------------------------------------------------
 
-
-
-
--- ---------------------------------------------------------
 
 -- When downloading data from the API, various errors occurred during the download and some data had to be downloaded again
 -- I created lists of IDs to be re-downloaded in python. Sometimes this had to be repeated for newly downloaded (error) IDs.
