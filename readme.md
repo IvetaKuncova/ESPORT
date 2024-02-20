@@ -7,7 +7,7 @@ It is about data from https://www.esportsearnings.com/.
 
 Data about GDP, population, internet are from from https://ourworldindata.org/.
 
-You can see our code in python and SQL (Snowflake).
+You can see my code in python and SQL (Snowflake).
 
 **1) PYTHON:**
 
@@ -26,7 +26,7 @@ The code consists of several parts:
 
 The code had to be written in the way that it could run for xx hours without interruption (typically overnight) and save the data continuously. If an error occurred, such as "Empty response" or "Bad gateway", the code had to either skip the given ID or try to download it again.
 
-**B)** There is also script for scraping _Date of Birth_, but I strictly recommend not use it, unless you are aware of legal consequencis!
+**B)** There is also script for scraping _Date of Birth_, but I strictly recommend not use it, unless you are aware of legal consequences!
 
 **2) SQL:**
 
@@ -37,5 +37,5 @@ In the next phase, we started creating tables from the created datasets accordin
 
 We used functions as: CTE, SUBSELECTS, CREATE (TEMPORARY) TABLE, ALTER TABLE, UPDATE, ADD COLLUMN, DROP COLLUMN, INSERT VALUES, (LEFT) JOIN, UNION (ALL), WINDOW FUNCTIONS (RANK), CASE WHEN, DISTINCT, AGGREGATIONS (SUM, COUNT, MEDIAN, AVG, MIN, MAX, PERCENTILE_CONT),  Text functions: TRIM, REPLACE, TRANSLATE, LISTAGG, REGEXP_SUBSTR, CONCAT, LOWER, (I)LIKE (ANY), IFFNULL, TRANSLATE, CONCAT, Date functions: TO_DATE, DATE, YEAR.
 
-**3) Correlation statistics - esport players**
+**3) Correlation statistics - e-sport players**
 There is a code in python Jupyter Notebook determining the degree of correlation (Kendall's Tau) between chosen indicators. This script also work with determining normality of distribution and linearity of data as a assumptions for statistical functions.
