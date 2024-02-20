@@ -1,5 +1,6 @@
 This is part of a project for our study in data analysis at Czechitas.cz - nonprofit organization for educating woman in IT.
-Project blog: https://medium.com/@vtkncv/e-sport-data-analysis-project-summary-e7b64cd37c84
+
+My Project blog: https://medium.com/@vtkncv/e-sport-data-analysis-project-summary-e7b64cd37c84
 
 **PROJECT E-SPORT**
 
