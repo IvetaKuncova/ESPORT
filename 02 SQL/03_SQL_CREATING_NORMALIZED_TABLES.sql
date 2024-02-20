@@ -19,7 +19,7 @@ FROM API01_PLAYER AS P
 FULL JOIN PlayerDOB AS D ON P."PlayerId"=D."PlayerId"
 ORDER BY P_PLAYER_ID;
 
--- the code for kosovo ‘xk’ is replaced by ‘ko’ in the PLAYER table, because that way it can be correctly linked to the COUNTRY table (ISO 3166)
+-- the code for Kosovo ‘xk’ is replaced by ‘ko’ in the PLAYER table, because that way it can be correctly linked to the COUNTRY table (ISO 3166)
 UPDATE PLAYER
 SET P_COUNTRY2CODE = 'KO' 
 WHERE P_COUNTRY2CODE = 'XK';
@@ -97,7 +97,7 @@ ORDER BY GDP_COUNTRY2CODE, GDP_YEAR;
 
 /* ===== BLOCK: Block 5 ===== */
 
--- creation of Population table
+-- creation of a Population table
 CREATE OR REPLACE TEMPORARY TABLE TEMP_POPULATION AS
 SELECT
     "Country_name" AS POP_COUNTRY,
@@ -286,7 +286,7 @@ ORDER BY I_COUNTRY, I_YEAR;
 
 /* ===== BLOCK: Block 7 ===== */
 
--- create Tournament table
+-- create a Tournament table
 CREATE OR REPLACE TABLE TOURNAMENT AS
 SELECT
     "TournamentId"::int AS T_TOURNAMENT_ID,
@@ -306,7 +306,7 @@ ORDER BY T_TOURNAMENT_ID, T_GAME_ID;
 
 /* ===== BLOCK: Block 8 ===== */
 
--- creating results table for individual player tournaments
+-- creating a results table for individual player tournaments
 
 CREATE OR REPLACE TABLE TOURNAMENT_RESULTS_INDIVIDUAL AS
 SELECT 
@@ -330,7 +330,7 @@ ORDER BY TT_TOURNAMENT_TEAM_ID;
 
 /* ===== BLOCK: Block 11 ===== */
 
--- creation of results table for team tournaments
+-- creation of a results table for team tournaments
 
 CREATE OR REPLACE TABLE TOURNAMENT_RESULTS_TEAM AS
 WITH CTE_CNTPLAYERS AS (
@@ -384,7 +384,7 @@ ORDER BY TRP_TOURNAMENT_ID, TRP_TOURNAMENT_TEAM_ID, TRP_PLAYER_ID;
 /* ===== BLOCK: Block 13 ===== */
 
 -- adding records about players who are in API08_TOURNAMENT_INDIVIDUAL_RESULTS and API10_TOURNAMENT_PLAYER_IN_TEAM_RESULTS tables
--- but the are not not in PLAYER table
+-- but the are not in the PLAYER table
 INSERT INTO PLAYER        
     (P_PLAYER_ID,
     P_NAME_FIRST,
@@ -401,7 +401,7 @@ SELECT
     "CountryCode" AS COUNTRY2CODE,
     SUM("PrizeUSD")::float AS PRIZE_USD
     FROM API08_TOURNAMENT_INDIVIDUAL_RESULTS
-    -- select id of players who are in TOURNAMENT_RESULTS_INDIVIDUAL table but not in PLAYERS table
+    -- select id's of players who are in the TOURNAMENT_RESULTS_INDIVIDUAL table but not in the PLAYERS table
         WHERE PLAYER_ID IN 
         (SELECT * FROM
             (SELECT DISTINCT TRI_PLAYER_ID AS PLAYERID
@@ -426,7 +426,7 @@ UNION
         SUM(TRP_PRIZE_USD_FOR_PLAYER)::float AS PRIZE_USD
     FROM "API10_TOURNAMENT_PLAYER_IN_TEAM_RESULTS"
     LEFT JOIN TOURNAMENT_RESULTS_PLAYER_IN_TEAM ON PLAYER_ID=TRP_PLAYER_ID
-    -- select id of players who are in  TOURNAMENT_RESULTS_PLAYER_IN_TEAM table but not in PLAYERS table
+    -- select id's of players who are in  the TOURNAMENT_RESULTS_PLAYER_IN_TEAM table but not in the PLAYERS table
         WHERE PLAYER_ID IN (
         SELECT * FROM
         (SELECT DISTINCT TRP_PLAYER_ID AS PLAYERID
