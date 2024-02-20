@@ -1,8 +1,8 @@
--- AGGREGATED DENORMALIZED TABLES FOR PLAYERS RETIREMENT STATISTICS IN TABLEAU
+-- AGGREGATED DENORMALIZED TABLES FOR PLAYER'S RETIREMENT STATISTICS IN TABLEAU
 
 /* ===== temporary table 1 ===== */
 CREATE OR REPLACE TEMPORARY TABLE TEMP01_PLA_GAME_YEAR AS
--- join of the select below with the TOURNAMENT table for collums YEAR OF TOURNAMENT and GAME_ID
+-- join of the select below with the TOURNAMENT table for colums YEAR OF TOURNAMENT and GAME_ID
 SELECT 
 TOURNAMENT_ID::int AS TOURNAMENT_ID, 
 PLAYER_ID::int AS PLAYER_ID, 
@@ -79,12 +79,12 @@ ORDER BY PLAYER_ID, c.GAME_ID, SUM2_PRIZE DESC;
 -- 79 527 rows
 
 /* the TEMP03_PLAYER_GAME_AVG_MED_QUA table shows that MEDIAN is not suitable for our purposes,
-because it divides the players ca into two halves (48.8 % and 51.2 %). 
+because it divides the players into two halves (48.8 % and 51.2 %). 
 The average and quantile are relatively similar, the quantile is more in line with our idea, 
 so we only work with the quantile below.
 The average divides the players into 82.8 % and 17.2 %
 The quantile divides the players into 89.4 % and 10.6 %
-Percentages should be viewed with the understanding that this is a rough preview that does not take into account fact, 
+Percentages should be viewed with the understanding that this is a rough preview that does not take into account the fact, 
 that the players are always in the source table broken down by a game. */
 
 -- QUANTILE
@@ -212,7 +212,7 @@ WHERE W_GAME_ID IN
 -- 252 rows
         
 /* ===== table 2 ===== */
-/* it was necessary (for the desired visualizations in Tableau) to transform the table that each column is split into two, 
+/* it was necessary (for the desired visualizations in Tableau) to transform the table so that each column is split into two, 
 depending on whether W_ISMORETHAN_QUA = 1 or 0. */
 CREATE OR REPLACE TABLE WHOSEARLYERRETIRED_KVA_ROWS AS
 SELECT
@@ -255,7 +255,7 @@ ORDER BY W_GAME_ID;
 
 CREATE OR REPLACE TABLE WHOSEARLYERRETIRED_MAXAGE AS
 WITH CTE_PDAK AS (
--- table with players, their's dates of birth, age on the year, when tournament has been held, and category of a player in Quantile
+-- table with players, their dates of birth, age on the year, when the tournament has been held, and category of a player in Quantile
 SELECT 
     pp.TOURNAMENT_ID, 
     pp.YEAR_OF_TOURNAMENT, 
@@ -272,7 +272,7 @@ JOIN PLAYER ON pp.PLAYER_ID = P_PLAYER_ID
 JOIN TEMP02_AVG_MED_QUA_PERGAME a ON a.GAME_ID = pp.GAME_ID
 WHERE P_BIRTH_YEAR is not null
 )
--- selecting games and it's average years, when players were playing it on tournaments and  maximum age of players for the game
+-- selecting games and their average years when players were playing it in tournaments and the maximum age of players for the game
 SELECT 
     x.GAME_ID::int AS W_GAME_ID, 
     G_GAME_NAME AS W_GAME_NAME, 
@@ -283,7 +283,7 @@ SELECT
     AVG(AVG_AGE) as W_AVG_AGE, 
     MIN(MIN_AGE) as W_MIN_AGE
 FROM
-    -- selecting players and their's max age and number of years they have played tournaments
+    -- selecting players and their's maximum age and number of years they have played tournaments
     (
     SELECT 
         GAME_ID, 
@@ -302,7 +302,7 @@ GROUP BY x.GAME_ID, G_GAME_NAME, x.ISMORETHAN_QUA
 ORDER BY x.GAME_ID, G_GAME_NAME, x.ISMORETHAN_QUA DESC;
 
 /* ===== table 4 ===== */
--- just a control table for a distribution of players in their years played 
+-- just a control table for distribution of players in their years played 
 CREATE OR REPLACE TABLE WHOSEARLIERRETIRED_PLAYERSBYYEARS AS
 SELECT 
     x.ISMORETHAN_QUA::int AS ISMORETHAN_QUA,

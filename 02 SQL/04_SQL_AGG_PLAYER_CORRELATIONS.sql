@@ -36,7 +36,7 @@ GROUP BY C_COUNTRY, C_CONTINENT;
 
 -- ---------------------------------------------------------------------------
 -- ---------------------------------------------------------------------------
--- similar results, but here are also countries with 0 players, which cannot be retrieved from select above, even if LEFT JOIN is present (i tested it).
+-- similar results, but here are also countries with 0 players, which cannot be retrieved from select above, even if LEFT JOIN is present (I tested it).
 -- Also I added RANKS
 WITH CTE_POP AS (
 SELECT POP_COUNTRY2CODE, POP_YEAR, POP_POPULATION, (POP_POPULATION_AGED15_19+POP_POPULATION_AGED20_29) AS "POP15-29"
