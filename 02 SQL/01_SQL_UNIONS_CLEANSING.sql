@@ -1,13 +1,13 @@
--- I downloaded data via python from different APIs. Because it took dozens of hours, there are up to 20 files for each API that need to be joined using UNION.
--- I knew rows need to be unique, so I used UNION to get rid of unwanted duplicates created when downloading data.
+-- I downloaded data via Python from different APIs. Because it took dozens of hours, there are up to 20 files for each API that need to be joined using UNION.
+-- I knew rows needed to be unique, so I used UNION to get rid of unwanted duplicates created when downloading data.
 -- The Goal for this phase was to have 1 complete file per API.
 
 -- ----------------------------------------------------------------------------
 -- API 01 PLAYER 
 CREATE OR REPLACE TEMPORARY table TEMP_01API_PLAYER_UNIONED AS
 /*In the source data were some players with two rows which differed only in the WorldRanking or CountryRanking columns. 
-I had to remove such duplicates and I chosed smaller (MIN) values for the players (higher/better in the rankings)
-The duplicity was across more files, therefore it was necessery uninon all files at first and filter it after that.*/
+I had to remove such duplicates and I chose smaller (MIN) values for the players (higher/better in the rankings)
+The duplicity was across more files, therefore it was necessary union all files at first and filter them after that.*/
     SELECT "NameFirst", "NameLast", "CurrentHandle", "CountryCode", MIN("WorldRanking") as "WorldRanking", MIN("CountryRanking") as "CountryRanking", "TotalUSDPrize", "TotalTournaments", "PlayerId"
     FROM
             ( 
@@ -134,9 +134,9 @@ please	   delete	please delete (duplicate)	48580
 please	   delete	duplicate please delete	    73341
 */
 
-/* create final table without null rows (except collumn
-"PlayerId", which is filled even if the player ID does not exists, because 
-I was adding IDs automatically in the python scripts)*/
+/* create a final table without null rows (except column
+"PlayerId", which is filled even if the player ID does not exist, because 
+I was adding IDs automatically in the Python scripts)*/
 CREATE OR REPLACE table API01_PLAYER 
     SELECT *
     FROM TEMP_01API_PLAYER_UNIONED
@@ -238,8 +238,8 @@ SELECT * FROM
     FROM "07-API-LookupTournamentById_errorids2" -- 20
 );
 
--- These tournaments were in the "tournament name" called as "please delete, duplicate" etc., but some turnaments with these words was not realy duplicates (just funny names for tournaments). 
--- I decided safe variant with deleting selected tournaments Ids.
+-- These tournaments were in the "tournament name" called "please delete, duplicate" etc., but some tournaments with these words were not really duplicates (just funny names for tournaments). 
+-- I decided safe variant by deleting selected tournament Ids.
 DELETE FROM TEMP_07API_TOURNAMENT_UNIONED
 WHERE "TournamentId" IN (24694, 39324, 52657, 52742, 52717, 52713, 52711, 52547, 52548, 52658, 52683, 52700, 44995, 28872, 28868, 28876, 42322, 36924, 33885, 42491);
 /*
@@ -272,9 +272,9 @@ UPDATE TEMP_07API_TOURNAMENT_UNIONED
 SET "StartDate" = '2020-05-07'
 WHERE "StartDate" = '0202-05-07';
 
-/* create final table without null rows (except collumn
-"TournamentId", which is filled even if the Trouenament ID does not exists, because 
-I was adding IDs automatically in the python scripts)*/
+/* create a final table without null rows (except column
+"TournamentId", which is filled even if the Trournament ID does not exist, because 
+I was adding IDs automatically in the Python scripts)*/
 CREATE OR REPLACE TABLE API07_TOURNAMENT AS
     SELECT * FROM TEMP_07API_TOURNAMENT_UNIONED
     EXCEPT
@@ -429,16 +429,16 @@ WHERE "CountryCode" IN ('', '-') OR lower("CountryCode") = 'null';
 
 -- "If a placement is associated with an unknown player, the "CurrentHandle" will be "##UNKNOWN##". 
 -- "PlayerId" in this instance is only used to return a unique row for each unknown player and can be discarded."
--- These ids were not unique and they maked trouble with real players IDs. For that reason I add 900 000 to them (max plays ID is about 135 000), 
--- and now I can distinguish them from original IDs, and I can easy filter them from real players by filtering < 900000.
+-- These ids were not unique and they made trouble with real players' IDs. For that reason, I add 900 000 to them (max plays ID is about 135 000), 
+-- and now I can distinguish them from original IDs, and I can easyly filter them from real players by filtering < 900000.
 UPDATE TEMP_API08_TOURNAMENT_RESULTS_INDIVIDUAL_UNIONED
 SET "PlayerId" = "PlayerId"::int+900000
 WHERE "CurrentHandle" = '##UNKNOWN##';
 
 
-/* create final table without null rows (except collumn
-"TournamentId", which is filled even if the tournament ID does not exists, because 
-I was adding IDs automatically in the python scripts)*/
+/* create a final table without null rows (except column
+"TournamentId", which is filled even if the tournament ID does not exist, because 
+I was adding IDs automatically in the Python scripts)*/
 CREATE OR REPLACE TABLE API08_TOURNAMENT_RESULTS_INDIVIDUAL AS
     SELECT * 
     FROM TEMP_API08_TOURNAMENT_RESULTS_INDIVIDUAL_UNIONED
@@ -475,7 +475,7 @@ SELECT * FROM
     FROM "09TournamentTeamResultsBytournamentID_teamplay1newids" --3
     );
 
--- data cleaning
+-- data cleansing
 UPDATE TEMP_API09_TOURNAMENT_RESULTS_TEAM_UNIONED
 SET "RankText" = null
 WHERE "RankText" IN ('-', '?', '.') OR lower("RankText") = 'null';
@@ -489,9 +489,9 @@ SET "TeamId" = null
 WHERE "TeamId" = 0;
 
 
-/* create final table without null rows (except collumn
-"TournamentId", which is filled even if the Tournament ID does not exists, because 
-I was adding IDs automatically in the python scripts)*/
+/* create a final table without null rows (except column
+"TournamentId", which is filled even if the Tournament ID does not exist, because 
+I was adding IDs automatically in the Python scripts)*/
 CREATE OR REPLACE TABLE API09_TOURNAMENT_RESULTS_TEAM AS
     SELECT * 
     FROM TEMP_API09_TOURNAMENT_RESULTS_TEAM_UNIONED
@@ -540,9 +540,9 @@ UPDATE TEMP_API10_TOURNAMENT_RESULTS_PLAYER_IN_TEAM_UNIONED
 SET "NameLast" = TRIM("NameLast", '-');
 
 
-/* create final table without null rows (except collumn
-"tournamentId", which is filled even if the Tournament ID does not exists, because 
-I was adding IDs automatically in the python scripts)*/
+/* create a final table without null rows (except column
+"tournamentId", which is filled even if the Tournament ID does not exist, because 
+I was adding IDs automatically in the Python scripts)*/
 CREATE OR REPLACE TABLE API10_TOURNAMENT_RESULTS_PLAYER_IN_TEAM AS
     SELECT * FROM TEMP_API10_TOURNAMENT_RESULTS_PLAYER_IN_TEAM_UNIONED
 EXCEPT
@@ -563,7 +563,7 @@ EXCEPT
 
 
 -- When downloading data from the API, various errors occurred during the download and some data had to be downloaded again
--- I created lists of IDs to be re-downloaded in python. Sometimes this had to be repeated for newly downloaded (error) IDs.
+-- I created lists of IDs to be re-downloaded in Python. Sometimes this had to be repeated for newly downloaded (error) IDs.
 
 CREATE OR REPLACE TABLE GAMEBYID_ERRORIDS AS
 SELECT "GameId"
