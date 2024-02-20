@@ -6,7 +6,7 @@ CREATE OR REPLACE TEMPORARY TABLE TEMP01_PLA_GAME_YEAR AS
 SELECT 
 TOURNAMENT_ID::int AS TOURNAMENT_ID, 
 PLAYER_ID::int AS PLAYER_ID, 
-SUM(SUM_PRIZE::float) AS SUM_PRIZE, 
+SUM(PRIZE::float) AS SUM_PRIZE, 
 YEAR(T_END_DATE)::int as YEAR_OF_TOURNAMENT, 
 T_GAME_ID::int AS GAME_ID
 FROM
@@ -14,25 +14,24 @@ FROM
     -- union of TOURNAMENT_RESULTS_INDIVIDUAL and TOURNAMENT_RESULTS_PLAYER_IN_TEAM tables
     SELECT 
         TRI_PLAYER_ID::int AS PLAYER_ID,
-        SUM(TRI_PRIZE_USD)::float AS SUM_PRIZE,
+        TRI_PRIZE_USD::float AS PRIZE,
         TRI_TOURNAMENT_ID::int AS TOURNAMENT_ID
     FROM TOURNAMENT_RESULTS_INDIVIDUAL
     -- PLAYER_IDs greater than 900,000 are not real IDs, 
     -- they only serve as a placeholder to keep track of the number of players and their winnings when the player is unknown.
     WHERE TRI_PLAYER_ID < 900000 
     
-UNION ALL
+    UNION ALL
 
     SELECT 
         TRP_PLAYER_ID::int AS PLAYER_ID,
-        SUM(TRP_PRIZE_USD_FOR_PLAYER)::float AS SUM_PRIZE,
+        TRP_PRIZE_USD_FOR_PLAYER::float AS PRIZE,
         TRP_TOURNAMENT_ID::int AS TOURNAMENT_ID
     FROM TOURNAMENT_RESULTS_PLAYER_IN_TEAM
-    ) AS AAA
+    ) AS AAA -- 315 520
 
 JOIN TOURNAMENT ON AAA.TOURNAMENT_ID=T_TOURNAMENT_ID
-GROUP BY TOURNAMENT_ID, PLAYER_ID, YEAR_OF_TOURNAMENT, GAME_ID;
-
+GROUP BY TOURNAMENT_ID, PLAYER_ID, YEAR_OF_TOURNAMENT, GAME_ID; -- 306 591
 
 /* ===== temporary table 2 ===== */
 -- WHAT IS THE AVERAGE, MEDIAN AND QUANTILE VALUE FOR A GAME?    
@@ -49,9 +48,7 @@ MEDIAN(SUM2_PRIZE) as MED_PRIZE_FOR_GAME,
 PERCENTILE_CONT( 0.9 ) WITHIN GROUP (ORDER BY SUM2_PRIZE) as QUA09_PRIZE_FOR_GAME
 FROM cte
 GROUP BY GAME_ID
-ORDER BY GAME_ID;
-
-
+ORDER BY GAME_ID; -- 853
 
 /* ===== temporary table 3 ===== */
 -- Dividing players_id into 2 categories >= OR < than AVG, MED, QUA.
@@ -78,7 +75,8 @@ FROM CTE_UNIK c
 JOIN TEMP02_AVG_MED_QUA_PERGAME a ON a.GAME_ID = c.GAME_ID
 WHERE SUM2_PRIZE is not null
 ORDER BY PLAYER_ID, c.GAME_ID, SUM2_PRIZE DESC;
--- 77 297 rows
+
+-- 79 527 rows
 
 /* the TEMP03_PLAYER_GAME_AVG_MED_QUA table shows that MEDIAN is not suitable for our purposes,
 because it divides the players ca into two halves (48.8 % and 51.2 %). 
@@ -116,58 +114,107 @@ that the players are always in the source table broken down by a game. */
 
 /* ===== table 1 ===== */
 
-CREATE OR REPLACE TABLE WHOSEARLYERRETIRED_QUA AS
-WITH CTE_WHOSEARLYERRETIRED_QUA AS 
-(
+CREATE OR REPLACE TABLE WHOSEARLYERRETIRED_KVA AS
+WITH CTE_WHOSEARLYERRETIRED_QUA AS (
 SELECT 
-    x.GAME_ID::int AS W_GAME_ID, 
-    G_GAME_NAME AS W_GAME_NAME, 
-    x.ISMORETHAN_QUA::int AS W_ISMORETHAN_QUA, 
-    COUNT(DISTINCT x.PLAYER_ID)::int as W_CTN_PLAYERS, 
-    AVG(x.CNT_YEARS)::float as W_AVG_CNT_YEARS, 
-    SUM(x.SUM_PRIZE)::float as W_SUM_PRIZE_USD
-FROM
+    T4_GAME_ID::int AS GAME_ID,
+    T4_GAME_NAME AS GAME_NAME,  
+    T4_RANK_PRIZE_USD::int AS RANK_PRIZE_USD,
+    T4_RANK_CNT_TOURNAMENTS::int AS RANK_CNT_TOURNAMENTS,
+    T4_RANK_CNT_PLAYERS::int AS RANK_CNT_PLAYERS,
+    T4_ISMORETHAN_QUA::int AS ISMORETHAN_QUA,
+    COUNT(DISTINCT T4_PLAYER_ID::int) AS CNT_PLAYER,
+    SUM(T4_SUM2_PRIZE_USD)::float AS SUM_PRIZE_USD,
+    AVG(T4_CNT_YEAR_OF_TOURNAMENT)::float AS AVG_YEARS
+FROM 
+------------------------------------------------------------------  b
     (
-    SELECT 
-        a.GAME_ID, 
-        a.PLAYER_ID, 
-        COUNT(DISTINCT YEAR_OF_TOURNAMENT) AS CNT_YEARS, 
-        ISMORETHAN_QUA, 
-        SUM_PRIZE
-    FROM TEMP_PLA_GAME_YEAR a
-    JOIN TEMP_PLAYER_GAME_AVG_MED_QUA b ON a.PLAYER_ID=b.PLAYER_ID
-    GROUP BY a.GAME_ID, a.PLAYER_ID, ISMORETHAN_QUA, SUM_PRIZE
-     ) x
-JOIN GAME g ON G_GAME_ID=x.GAME_ID
-GROUP BY x.GAME_ID, G_GAME_NAME, x.ISMORETHAN_QUA
-ORDER BY x.GAME_ID, G_GAME_NAME, x.ISMORETHAN_QUA DESC
-) 
--- 1043 rows
+    SELECT
+        T3_GAME_ID AS T4_GAME_ID,
+        T3_GAME_NAME AS T4_GAME_NAME,
+        T3_RANK_PRIZE_USD AS T4_RANK_PRIZE_USD,
+        T3_RANK_CNT_TOURNAMENTS AS T4_RANK_CNT_TOURNAMENTS,
+        T3_RANK_CNT_PLAYERS AS T4_RANK_CNT_PLAYERS,
+        COUNT(DISTINCT T3_TOURNAMENT_ID) AS T4_CNT_TOURNAMENTS, -- how many tournaments has played each player
+        COUNT(DISTINCT T3_YEAR_OF_TOURNAMENT) AS T4_CNT_YEAR_OF_TOURNAMENT, -- how many years the player played
+        -- here is not correct to COUNT PLAYERS. I needed to know, how many years !every! player played tournaments
+        T3_PLAYER_ID AS T4_PLAYER_ID,
+        SUM(T3_SUM_PRIZE_USD) AS T4_SUM2_PRIZE_USD,
+        ISMORETHAN_QUA AS T4_ISMORETHAN_QUA
+    FROM
+------------------------------------------------------------------  a
+        (
+        SELECT 
+            t1.TOURNAMENT_ID AS T3_TOURNAMENT_ID,
+            t1.YEAR_OF_TOURNAMENT AS T3_YEAR_OF_TOURNAMENT,
+            t1.PLAYER_ID AS T3_PLAYER_ID,
+            SUM(t1.SUM_PRIZE) AS T3_SUM_PRIZE_USD,
+            t1.GAME_ID AS T3_GAME_ID,
+            t2.G_GAME_NAME AS T3_GAME_NAME,
+            t2.G_RANK_PRIZE_USD AS T3_RANK_PRIZE_USD,
+            t2.G_RANK_CNT_TOURNAMENTS AS T3_RANK_CNT_TOURNAMENTS,
+            t2.G_RANK_CNT_PLAYERS AS T3_RANK_CNT_PLAYERS
+        FROM TEMP01_PLA_GAME_YEAR t1 
+        JOIN GAME t2 ON t2.G_GAME_ID=T3_GAME_ID
+        GROUP BY     
+            T3_GAME_ID,
+            T3_GAME_NAME,
+            T3_RANK_PRIZE_USD,
+            T3_RANK_CNT_TOURNAMENTS,
+            T3_RANK_CNT_PLAYERS,
+            T3_TOURNAMENT_ID,
+            T3_YEAR_OF_TOURNAMENT,
+            T3_PLAYER_ID
+        ) t3 -- 306 541
+------------------------------------------------------------------  a
+    JOIN TEMP03_PLAYER_GAME_AVG_MED_QUA t5 ON t5.GAME_ID=T4_GAME_ID AND t5.PLAYER_ID=T4_PLAYER_ID    
+    GROUP BY
+        T4_GAME_ID,
+        T4_GAME_NAME,
+        T4_RANK_PRIZE_USD,
+        T4_RANK_CNT_TOURNAMENTS,
+        T4_RANK_CNT_PLAYERS,
+        T4_PLAYER_ID,
+        T4_ISMORETHAN_QUA
+    ) t4 -- 79 504
+------------------------------------------------------------------  b
+GROUP BY 
+    GAME_ID,
+    GAME_NAME,
+    RANK_PRIZE_USD,
+    RANK_CNT_TOURNAMENTS,
+    RANK_CNT_PLAYERS,
+    ISMORETHAN_QUA
+ORDER BY GAME_ID, ISMORETHAN_QUA
+) -- 1031
 
--- creating final table, where sample of players for a game is more than 100 players (Because smaller sample is not statisticaly representative)
 SELECT 
-    W_GAME_ID, 
-    W_GAME_NAME, 
-    W_ISMORETHAN_QUA,  
-    W_CTN_PLAYERS, 
-    W_AVG_CNT_YEARS, 
-    W_SUM_PRIZE_USD
+    GAME_ID AS W_GAME_ID, 
+    GAME_NAME AS W_GAME_NAME, 
+    RANK_PRIZE_USD AS W_RANK_PRIZE_USD,
+    RANK_CNT_TOURNAMENTS AS W_RANK_CNT_TOURNAMENTS,
+    RANK_CNT_PLAYERS AS W_RANK_CNT_PLAYERS,
+    ISMORETHAN_QUA AS W_ISMORETHAN_QUA,  
+    CNT_PLAYER AS W_CNT_PLAYERS, 
+    AVG_YEARS AS W_AVG_CNT_YEARS, 
+    SUM_PRIZE_USD AS W_SUM_PRIZE_USD
 FROM CTE_WHOSEARLYERRETIRED_QUA
 WHERE W_GAME_ID IN 
-        (SELECT DISTINCT W_GAME_ID FROM
+        (SELECT DISTINCT GAME_ID FROM
             (
-            SELECT W_GAME_ID, SUM(W_CTN_PLAYERS) AS SUM_PLAYERS
+            SELECT GAME_ID, SUM(CNT_PLAYER) AS SUM_PLAYERS
             FROM CTE_WHOSEARLYERRETIRED_QUA
-            GROUP BY W_GAME_ID
+            GROUP BY GAME_ID
             HAVING SUM_PLAYERS >=100
             )
-        ); -- 268 rows
+        );
 
-
+-- 252 rows
+        
 /* ===== table 2 ===== */
 /* it was necessary (for the desired visualizations in Tableau) to transform the table that each column is split into two, 
 depending on whether W_ISMORETHAN_QUA = 1 or 0. */
-CREATE OR REPLACE TABLE WHOSEARLYERRETIRED_QUA_ROWS AS
+CREATE OR REPLACE TABLE WHOSEARLYERRETIRED_KVA_ROWS AS
 SELECT
     W_GAME_ID, 
     W_GAME_NAME, 
@@ -181,28 +228,27 @@ FROM
         W_GAME_ID, 
         W_GAME_NAME,
         0 AS CTN_PLAYERS_0, 
-        W_CTN_PLAYERS AS CTN_PLAYERS_1,
+        W_CNT_PLAYERS AS CTN_PLAYERS_1,
         0 AS SUM_PRIZE_USD_0,
         W_SUM_PRIZE_USD AS SUM_PRIZE_USD_1, 
         0 AS W_AVG_CNT_YEARS_0,
         W_AVG_CNT_YEARS AS W_AVG_CNT_YEARS_1 
-    FROM WHOSEARLYERRETIRED_QUA 
+    FROM WHOSEARLYERRETIRED_KVA 
     WHERE W_ISMORETHAN_QUA = 1
     UNION
     SELECT 
         W_GAME_ID, 
         W_GAME_NAME,
-        W_CTN_PLAYERS AS CTN_PLAYERS_0, 
+        W_CNT_PLAYERS AS CTN_PLAYERS_0, 
         0 AS CTN_PLAYERS_1,
         W_SUM_PRIZE_USD AS SUM_PRIZE_USD_0, 
         0 AS SUM_PRIZE_USD_1,
         W_AVG_CNT_YEARS AS W_AVG_CNT_YEARS_0,
         0 AS W_AVG_CNT_YEARS_1
-    FROM WHOSEARLYERRETIRED_QUA 
+    FROM WHOSEARLYERRETIRED_KVA 
     WHERE W_ISMORETHAN_QUA = 0)
 GROUP BY W_GAME_ID, W_GAME_NAME
 ORDER BY W_GAME_ID;
-
 
 /* ===== table 3 ===== */
 -- table of maximum age of players for games
@@ -233,7 +279,9 @@ SELECT
     x.ISMORETHAN_QUA::int AS W_ISMORETHAN_QUA,  
     COUNT(DISTINCT x.PLAYER_ID)::int as W_CTN_PLAYERS, 
     AVG(CNT_AGE)::float as W_AVG_CNT_YEARS, 
-    MAX(MAX_AGE)::int as W_MAX_AGE
+    MAX(MAX_AGE)::int as W_MAX_AGE,
+    AVG(AVG_AGE) as W_AVG_AGE, 
+    MIN(MIN_AGE) as W_MIN_AGE
 FROM
     -- selecting players and their's max age and number of years they have played tournaments
     (
@@ -242,6 +290,8 @@ FROM
         PLAYER_ID, 
         COUNT(DISTINCT AGE_ON_TOURNAMENT_YEAR) as CNT_AGE, 
         MAX(AGE_ON_TOURNAMENT_YEAR) as MAX_AGE, 
+        AVG(AGE_ON_TOURNAMENT_YEAR) as AVG_AGE, 
+        MIN(AGE_ON_TOURNAMENT_YEAR) as MIN_AGE, 
         SUM(SUM_PRIZE) as SUM2_PRIZE, 
         ISMORETHAN_QUA
     FROM CTE_PDAK 
@@ -250,7 +300,6 @@ FROM
 JOIN GAME g ON G_GAME_ID=x.GAME_ID
 GROUP BY x.GAME_ID, G_GAME_NAME, x.ISMORETHAN_QUA
 ORDER BY x.GAME_ID, G_GAME_NAME, x.ISMORETHAN_QUA DESC;
-
 
 /* ===== table 4 ===== */
 -- just a control table for a distribution of players in their years played 
@@ -299,9 +348,10 @@ ISMORETHAN_KVA	CNT_YEARS	CTN_PLAYERS
 1	            1	        1917
 */
 
-/* ===== bonus selects  ===== */
+/* ===== bonus select  ===== */
 -- how old are the players today (result on 11/2023)
-SELECT COUNT(DISTINCT P_PLAYER_ID) as CNT_PLAYERS, DATEDIFF( YEAR, P_DATE_OF_BIRTH, CURRENT_DATE()) AS AGE FROM PLAYER
+SELECT COUNT(DISTINCT P_PLAYER_ID) as CNT_PLAYERS, DATEDIFF( YEAR, P_DATE_OF_BIRTH, CURRENT_DATE()) AS AGE 
+FROM PLAYER
 WHERE P_DATE_OF_BIRTH is not null
 GROUP BY AGE
 ORDER BY CNT_PLAYERS DESC;
@@ -352,6 +402,39 @@ CNT_PLAYERS	    AGE
 ;
 
 /*
-AVG_MIN_AGE	    AVG_MAX_AGE
-20.862366	    23.585375
+AVG_MIN_AGE	AVG_MAX_AGE
+20.809902	23.535710
+*/
+----------------
+SELECT 
+t01.GAME_ID::int AS GAME_ID,
+G_GAME_NAME AS GAME_NAME,
+G_RANK_PRIZE_USD,
+COUNT(DISTINCT t01.TOURNAMENT_ID::int) AS CNT_TOURNAMENTS, 
+COUNT(DISTINCT t01.YEAR_OF_TOURNAMENT) AS CNT_YEARS,
+COUNT(DISTINCT t01.PLAYER_ID::int) AS CNT_PLAYERS
+FROM TEMP01_PLA_GAME_YEAR t01
+JOIN GAME g ON t01.GAME_ID=G_GAME_ID
+GROUP BY t01.GAME_ID, GAME_NAME, G_RANK_PRIZE_USD
+ORDER BY CNT_YEARS DESC;
+
+/*
+GAME_ID GAME_NAME                       G_RANK_PRIZE_USD    CNT_TOURNAMENTS     CNT_YEARS   CNT_PLAYERS
+179	    Age of Empires II	            56	                1246	            24	        1203
+204	    Super Smash Bros. Melee	        45	                2298	            22	        1706
+152	    StarCraft: Brood War	        27	                515	                21	        631
+166	    Super Street Fighter II Turbo	347	                50	                20	        114
+178	    Age of Mythology	            197	                241	                20	        190
+158	    WarCraft III	                35	                1456	            19	        672
+510	    Age of Empires	                137	                146	                19	        279
+194	    Marvel vs. Capcom 2	            318	                26	                18	        68
+167	    Street Fighter III: 3rd Strike	288	                42	                18	        108
+177	    Age of Empires III	            223	                144	                16	        123
+162	    Counter-Strike	                18	                535	                15	        2675
+330	    Super Smash Bros.	            259	                107	                15	        214
+195	    Capcom vs. SNK 2	            353	                20	                14	        38
+151	    StarCraft II	                8	                7175	            14	        2168
+532	    iRacing.com	                    53	                121	                14	        859
+205	    Super Smash Bros. Brawl	        169	                329	                14	        494
+(...)
 */

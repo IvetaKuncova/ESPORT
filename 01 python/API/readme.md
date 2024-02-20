@@ -1,18 +1,18 @@
 # Python scripts for downloading data from https://www.esportsearnings.com/ APIs#
 
-There is 12 scripts for 12 APIs
-Order (Number) of APIs is the same as on the original documentation: https://www.esportsearnings.com/apidocs
+There are 12 scripts for 12 APIs
+The Order (Number) of APIs is the same as on the original documentation: https://www.esportsearnings.com/apidocs
 Output format: jsonl + csv
 
 ### APIs are divided into 3 categories: according to what you have to enter in URL of the request
 A) ID
-- core data for normalised database
+- core data for normalized database
 B) ID, offset
-- a summary overwiev
+- a summary overview
 C) offset 
-- a summary overwiev
+- a summary overview
 
-Scripts in one category are the same, only name of main variable (player / game /tournament) or name of a funcion, URL, file name etc. differs.
+Scripts in one category are the same, only the name of the main variable (player / game /tournament) or the name of a function, URL, file name etc. differs.
 
 ### No. API                                                 Category     Input
 **01  Look up Player By Id                                 A             player ID**
