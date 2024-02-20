@@ -1,5 +1,7 @@
 # Python scripts for downloading data from https://www.esportsearnings.com/ APIs#
 
+# For information about my E-sport project, you can read my blog: https://medium.com/@vtkncv/e-sport-part-2-python-acb60fb6d58b 
+
 There are 12 scripts for 12 APIs
 The Order (Number) of APIs is the same as on the original documentation: https://www.esportsearnings.com/apidocs
 Output format: jsonl + csv
