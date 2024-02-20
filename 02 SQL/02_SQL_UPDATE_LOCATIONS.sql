@@ -1,18 +1,18 @@
-/* This part of the project was a team work. There was so many distinct locations (ca 3000), 
-which we had to go through manualy, it has to be done in cooperation. 
+/* This part of the project was a teamwork. There were so many distinct locations (ca 3000), 
+which we had to go through manually, it has to be done in cooperation. 
 */
 
 CREATE OR REPLACE TABLE API07_TOURNAMENT_LOCATIONS AS
 SELECT *, "Location" as UPDATED_LOCATION FROM API07_TOURNAMENT_UNIONED;
 
--- Update locations - change all ";" to ",". It has maked trouble while updating some rows - they did not update even though the text was in '' or with %.
+-- Update locations - change all ";" to ",". It has made trouble while updating some rows - they did not update even though the text was in '' or with %.
 UPDATE API07_TOURNAMENT_LOCATIONS
 SET "Location" = REPLACE("Location", ';', ',');
 
 -- troubled locations (not a country or city)
 UPDATE API07_TOURNAMENT_LOCATIONS
 SET UPDATED_LOCATION = null
--- locations with more than one country was considered online
+-- locations with more than one country were considered online
 WHERE (UPDATED_LOCATION ILIKE ANY 
         (
         ' West Europe', 
@@ -201,7 +201,7 @@ WHERE (UPDATED_LOCATION ILIKE ANY
         ('AMERICA',
         '%EMEA%'
         ))
--- locations with 'online/offline' and country or city are considered as offline
+-- locations with 'online/offline' and country or city are considered "offline"
 AND UPDATED_LOCATION NOT IN (
     'Offline/Online (Busan)',
     'Online / Offline (Germany)', 
@@ -843,13 +843,13 @@ WHERE UPDATED_LOCATION ILIKE ANY ('%Vietnam%', 'AOEVIET 76 Le Duc Tho Street', '
 
 
 -- ONLINE
--- add collumn with information about online tournaments (2 source collumns: Location and Tournament name)
+-- add column with information about online tournaments (2 source columns: Location and Tournament name)
 ALTER TABLE API07_TOURNAMENT_LOCATIONS
 ADD COLUMN ONLINETOURNAMENTS VARCHAR (255) NULL;
 
 UPDATE API07_TOURNAMENT_LOCATIONS
     SET ONLINETOURNAMENTS = 'online',
-    -- locations with more than one country or any country was considered as online (they were nulled above)
+    -- locations with more than one country or any country were considered as online (they were nulled above)
     "UPDATED_LOCATION" = NULL 
     WHERE ("Location" 
     ILIKE ANY (
