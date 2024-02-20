@@ -427,6 +427,7 @@ SET "CountryCode" = null
 WHERE "CountryCode" IN ('', '-') OR lower("CountryCode") = 'null';
 
 
+-- Placeholder IDs
 -- "If a placement is associated with an unknown player, the "CurrentHandle" will be "##UNKNOWN##". 
 -- "PlayerId" in this instance is only used to return a unique row for each unknown player and can be discarded."
 -- These ids were not unique and they made trouble with real players' IDs. For that reason, I add 900 000 to them (max plays ID is about 135 000), 
